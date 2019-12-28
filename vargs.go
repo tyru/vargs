@@ -16,6 +16,8 @@ var (
 	nulTerminated = flag.Bool("0", false, "Change separator to NUL character. This is same as \"-s nul\"")
 	separators    = flag.String("s", "newline", "Change separators with these comma-separated values (available values are \"space\", \"tab\", \"newline\", \"nul\")")
 	replaceStr    = flag.String("I", "", "If this replacement string was given, replace arguments by this with each item")
+	// for compatibility with xargs, name it as -t
+	verbose = flag.Bool("t", false, "Print JSON command to standard error before printing with escape sequence")
 )
 
 func main() {
@@ -66,7 +68,11 @@ func main() {
 					cancel()
 					return
 				}
-				fmt.Printf("\x1b]51;%s\x07", string(b))
+				cmd := string(b)
+				if *verbose {
+					fmt.Fprintln(os.Stderr, cmd)
+				}
+				fmt.Printf("\x1b]51;%s\x07", cmd)
 			}
 		}
 	}()
