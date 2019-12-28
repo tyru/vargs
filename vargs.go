@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
@@ -70,7 +71,12 @@ func main() {
 		}
 	}()
 
-	err := readEach(ctx, os.Stdin, strings.Split(*separators, ","), ch)
+	sepRunes, err := convertSeparators(*separators)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	err = readEach(ctx, os.Stdin, sepRunes, ch)
 	<-done
 
 	if err != nil {
@@ -105,9 +111,38 @@ func makeMsgBuilder(msg []string) func(string) []string {
 	}
 }
 
-// TODO: separators
-func readEach(ctx context.Context, r io.Reader, separators []string, dst chan string) error {
+func convertSeparators(separators string) ([]rune, error) {
+	runes := make([]rune, 0, 5)
+	for _, s := range strings.Split(separators, ",") {
+		switch s {
+		case "space":
+			runes = append(runes, ' ')
+		case "tab":
+			runes = append(runes, '\t')
+		case "newline":
+			runes = append(runes, '\r', '\n')
+		case "nul":
+			runes = append(runes, '\x00')
+		default:
+			return nil, fmt.Errorf("unknown separator '%s'", s)
+		}
+	}
+	return runes, nil
+}
+
+func readEach(ctx context.Context, r io.Reader, separators []rune, dst chan string) error {
 	scanner := bufio.NewScanner(r)
+	isSep := func(r rune) bool {
+		for _, s := range separators {
+			if s == r {
+				return true
+			}
+		}
+		return false
+	}
+	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		return scanWords(isSep, data, atEOF)
+	})
 	for scanner.Scan() {
 		select {
 		case <-ctx.Done():
@@ -118,4 +153,31 @@ func readEach(ctx context.Context, r io.Reader, separators []string, dst chan st
 	}
 	close(dst)
 	return scanner.Err()
+}
+
+// https://golang.org/src/bufio/scan.go?s=13096:13174#L380
+func scanWords(isSep func(rune) bool, data []byte, atEOF bool) (advance int, token []byte, err error) {
+	// Skip separators.
+	start := 0
+	for width := 0; start < len(data); start += width {
+		var r rune
+		r, width = utf8.DecodeRune(data[start:])
+		if !isSep(r) {
+			break
+		}
+	}
+	// Scan until non-separator character, marking end of word.
+	for width, i := 0, start; i < len(data); i += width {
+		var r rune
+		r, width = utf8.DecodeRune(data[i:])
+		if isSep(r) {
+			return i + width, data[start:i], nil
+		}
+	}
+	// If we're at EOF, we have a final, non-empty, non-terminated word. Return it.
+	if atEOF && len(data) > start {
+		return len(data), data[start:], nil
+	}
+	// Request more data.
+	return start, nil, nil
 }
