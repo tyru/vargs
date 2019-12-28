@@ -26,9 +26,23 @@ func main() {
 
 	var msg []string
 	if flag.NArg() == 0 {
-		msg = []string{"drop"}
+		if *replaceStr == "" {
+			msg = []string{"drop"}
+		} else {
+			msg = []string{"drop", *replaceStr}
+		}
 	} else {
 		msg = flag.Args()
+	}
+	existsReplaceStr := false
+	for _, m := range msg {
+		if strings.Contains(m, *replaceStr) {
+			existsReplaceStr = true
+			break
+		}
+	}
+	if !existsReplaceStr {
+		fmt.Fprintln(os.Stderr, "warning: -I {replstr} option was specified but no {replstr} in arguments")
 	}
 	buildMsg := makeMsgBuilder(msg)
 
