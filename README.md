@@ -92,3 +92,5 @@ function! s:gopath() abort
   call project_guide#open(root_dir .. '/src/*/*/*')
 endfunction
 ```
+
+![](https://i.imgur.com/YJ4qWsT.gif)
