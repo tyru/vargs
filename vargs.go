@@ -17,7 +17,7 @@ var (
 	separators    = flag.String("s", "newline", "Change separators with these comma-separated values (available values are \"space\", \"tab\", \"newline\", \"nul\")")
 	replaceStr    = flag.String("I", "", "If this replacement string was given, replace arguments by this with each item")
 	// for compatibility with xargs, name it as -t
-	verbose = flag.Bool("t", false, "Print JSON command to standard error before printing with escape sequence")
+	verbose = flag.Bool("t", false, "Print JSON command to standard error before printing with escape sequence (verbose print)")
 )
 
 func main() {
