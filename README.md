@@ -50,37 +50,37 @@ Other Vim plugin examples using Terminal API:
 Using peco
 
 ```
-ls | peco | vargs
+$ ls | peco | vargs
 ```
 
 Using gof (recurse subdirectories)
 
 ```
-gof | vargs
+$ gof | vargs
 ```
 
 However, [`gof` already has `-t` option](https://github.com/mattn/gof/pull/14) to open in Vim :smirk:
 
 ```
-gof -t
+$ gof -t
 ```
 
 ### Open all files under repository
 
 ```
-find . -path ./.git -prune -o -type f | vargs
+$ find . -path ./.git -prune -o -type f | vargs
 ```
 
 More safe way...
 
 ```
-find . -path ./.git -prune -o -type f -print0 | vargs -0
+$ find . -path ./.git -prune -o -type f -print0 | vargs -0
 ```
 
 ### Open project under $GOPATH
 
 ```
-ls -d $GOPATH/src/github.com/*/* | peco | vargs
+$ ls -d $GOPATH/src/github.com/*/* | peco | vargs
 ```
 
 You may prefer [project-guide.vim](https://github.com/tyru/project-guide.vim) with this setting:
