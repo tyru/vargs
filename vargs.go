@@ -152,7 +152,7 @@ func readEach(ctx context.Context, r io.Reader, separators []rune, dst chan stri
 		return false
 	}
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		return scanWords(isSep, data, atEOF)
+		return scan(isSep, data, atEOF)
 	})
 	for scanner.Scan() {
 		select {
@@ -167,7 +167,7 @@ func readEach(ctx context.Context, r io.Reader, separators []rune, dst chan stri
 }
 
 // https://golang.org/src/bufio/scan.go?s=13096:13174#L380
-func scanWords(isSep func(rune) bool, data []byte, atEOF bool) (advance int, token []byte, err error) {
+func scan(isSep func(rune) bool, data []byte, atEOF bool) (advance int, token []byte, err error) {
 	// Skip separators.
 	start := 0
 	for width := 0; start < len(data); start += width {
