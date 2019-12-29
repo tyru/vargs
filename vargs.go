@@ -23,6 +23,11 @@ var (
 func main() {
 	flag.Parse()
 
+	if os.Getenv("VIM_TERMINAL") == "" {
+		fmt.Fprintln(os.Stderr, "[error] you are running vargs outside vim.")
+		os.Exit(1)
+	}
+
 	if *nulTerminated {
 		*separators = "nul"
 	}
