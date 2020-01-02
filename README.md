@@ -83,14 +83,4 @@ $ find . -path ./.git -prune -o -type f -print0 | vargs -0
 $ ls -d $GOPATH/src/github.com/*/* | peco | vargs
 ```
 
-You may prefer [project-guide.vim](https://github.com/tyru/project-guide.vim) with this setting:
-
-```vim
-command! Gopath call s:gopath()
-function! s:gopath() abort
-  let root_dir = exists('$GOPATH') ? expand('$GOPATH') : expand('$HOME/go')
-  call project_guide#open(root_dir .. '/src/*/*/*')
-endfunction
-```
-
-![](https://i.imgur.com/YJ4qWsT.gif)
+You may prefer [project-guide.vim](https://github.com/tyru/project-guide.vim).
